@@ -10,6 +10,8 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
+#有三个目的
+#1. include
 APPEND=no	# Default: Create new config file
 BOARD_NAME=""	# Name to print in make output
 TARGETS=""

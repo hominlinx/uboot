@@ -157,6 +157,7 @@ else
 _all: modules
 endif
 
+# if $(KBUILD_SRC),$(KBUILD_SRC),$(CURDIR) 这个是makefile的if函数, 在这里 srctree := ${CURDIR}; ${CURDIR}是当前目录(内部变量)。
 srctree		:= $(if $(KBUILD_SRC),$(KBUILD_SRC),$(CURDIR))
 objtree		:= $(CURDIR)
 src		:= $(srctree)
@@ -167,6 +168,7 @@ VPATH		:= $(srctree)$(if $(KBUILD_EXTMOD),:$(KBUILD_EXTMOD))
 export srctree objtree VPATH
 
 MKCONFIG	:= $(srctree)/mkconfig
+# 这个是makefile的export，目的是在子makefile下面也可以拿到这个变量
 export MKCONFIG
 
 # Make sure CDPATH settings don't interfere
@@ -456,6 +458,11 @@ ifeq ($(config-targets),1)
 # KBUILD_DEFCONFIG may point out an alternative default configuration
 # used for 'make defconfig'
 
+# % 是一个通配符, 输入Bananapi_config 时 会匹配到这里
+# :: 这个是一个规则，暂时不管
+# @ 代表make的时候不输出make信息
+# -A 暂不知道
+#  $@ 表示规则中的目标,也就是“Bananapi_config”, $(@:_config=) 将变为"Bananpi"
 %_config:: outputmakefile
 	@$(MKCONFIG) -A $(@:_config=)
 
