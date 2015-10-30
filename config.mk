@@ -24,6 +24,7 @@ OBJCOPYFLAGS :=
 # so calculate CPUDIR before including ARCH/SOC/CPU config.mk files.
 # Check if arch/$ARCH/cpu/$CPU exists, otherwise assume arch/$ARCH/cpu contains
 # CPU-specific code.
+# 这个决定了start.o
 CPUDIR=arch/$(ARCH)/cpu/$(CPU)
 ifneq ($(srctree)/$(CPUDIR),$(wildcard $(srctree)/$(CPUDIR)))
 CPUDIR=arch/$(ARCH)/cpu

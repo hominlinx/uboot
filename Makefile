@@ -48,6 +48,7 @@ export LC_COLLATE LC_NUMERIC
 # To put more focus on warnings, be less verbose as default
 # Use 'make V=1' to see the full commands
 
+# 这个涉及到 origin函数，如果V没有定义过，返回“undefined”， 如果变量来自命令行，返回“command line”, 可以使用“make V=1”, 则KBUILD_VERBOSE=1
 ifeq ("$(origin V)", "command line")
   KBUILD_VERBOSE = $(V)
 endif
@@ -101,10 +102,13 @@ endif
 
 # KBUILD_SRC is set on invocation of make in OBJ directory
 # KBUILD_SRC is not intended to be used by the regular user (for now)
+# 这个时候是空的
 ifeq ($(KBUILD_SRC),)
 
 # OK, Make called in directory where kernel src resides
 # Do we want to locate output files in a separate directory?
+# O 就是output目录变量。使用方法：make -O=XXXDIR
+# 或者设置环境变量export KBUILD_OUTPUT=dir/to/store/output/files/
 ifeq ("$(origin O)", "command line")
   KBUILD_OUTPUT := $(O)
 endif
@@ -120,6 +124,7 @@ _all:
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile: ;
 
+#如果KBUILD_OUTPUT 不为空 则执行下面的逻辑
 ifneq ($(KBUILD_OUTPUT),)
 # Invoke a second make in the output directory, passing relevant variables
 # check that the output directory actually exists
@@ -129,11 +134,13 @@ KBUILD_OUTPUT := $(shell mkdir -p $(KBUILD_OUTPUT) && cd $(KBUILD_OUTPUT) \
 $(if $(KBUILD_OUTPUT),, \
      $(error output directory "$(saved-output)" does not exist))
 
+#make的环境变量叫MAKECMDGOALS 这个变量中会存放你所指定的终极目标的列表，如果在命令行上，你没有指定目标，那么，这个变量是空值  
 PHONY += $(MAKECMDGOALS) sub-make
 
 $(filter-out _all sub-make $(CURDIR)/Makefile, $(MAKECMDGOALS)) _all: sub-make
 	@:
 
+#只要KBUILD_VERBOSE 不是1， 就是@，目的是静静的执行
 sub-make: FORCE
 	$(if $(KBUILD_VERBOSE:1=),@)$(MAKE) -C $(KBUILD_OUTPUT) \
 	KBUILD_SRC=$(CURDIR) \
@@ -158,6 +165,7 @@ _all: modules
 endif
 
 # if $(KBUILD_SRC),$(KBUILD_SRC),$(CURDIR) 这个是makefile的if函数, 在这里 srctree := ${CURDIR}; ${CURDIR}是当前目录(内部变量)。
+# srctree 就是make时所在的目录
 srctree		:= $(if $(KBUILD_SRC),$(KBUILD_SRC),$(CURDIR))
 objtree		:= $(CURDIR)
 src		:= $(srctree)
@@ -197,11 +205,13 @@ VENDOR=
 #########################################################################
 
 # set default to nothing for native builds
+# 执行的时候，需要加入这个, 比如`make CROSS_COMPILE=arm-linux-gnueabihf-`
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
 endif
 
 # SHELL used by kbuild
+#
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
@@ -209,6 +219,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 HOSTCC       = gcc
 HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
 
+#如果HOSTOS是cygwin
 ifeq ($(HOSTOS),cygwin)
 HOSTCFLAGS	+= -ansi
 endif
@@ -249,6 +260,7 @@ KBUILD_BUILTIN := 1
 #	the built-in objects during the descend as well, in order to
 #	make sure the checksums are up to date before we record them.
 
+#如果是 make modules 这个是1.
 ifeq ($(MAKECMDGOALS),modules)
   KBUILD_BUILTIN := $(if $(CONFIG_MODVERSIONS),1)
 endif
@@ -292,6 +304,7 @@ export KBUILD_CHECKSRC KBUILD_SRC KBUILD_EXTMOD
 # If KBUILD_VERBOSE equals 0 then the above command will be hidden.
 # If KBUILD_VERBOSE equals 1 then the above command is displayed.
 
+# 在执行`make V=1`的时候， 为1
 ifeq ($(KBUILD_VERBOSE),1)
   quiet =
   Q =
@@ -302,6 +315,8 @@ endif
 
 # If the user is running make -s (silent mode), suppress echoing of
 # commands
+# filter s% -s%, 匹配 sXXXX 或者 -sXXXX
+# 这里感觉没有作用？？
 
 ifneq ($(filter s% -s%,$(MAKEFLAGS)),)
   quiet=silent_
@@ -318,6 +333,7 @@ $(srctree)/scripts/Kbuild.include: ;
 include $(srctree)/scripts/Kbuild.include
 
 # Make variables (CC, etc...)
+# 定义交叉编译链工具 
 
 AS		= $(CROSS_COMPILE)as
 # Always use GNU ld
@@ -557,6 +573,7 @@ export CONFIG_SYS_TEXT_BASE
 
 # Use UBOOTINCLUDE when you must reference the include/ directory.
 # Needed to be compatible with the O= option
+# 这个-Iinclude表示指定头文件的搜索路径，要是前面的I变成小写i，那就是指定链接库。这里就是指定头文件在/arch/arm/include下。
 UBOOTINCLUDE    := \
 		-Iinclude \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
@@ -573,10 +590,13 @@ c_flags := $(KBUILD_CFLAGS) $(cpp_flags)
 #########################################################################
 # U-Boot objects....order is important (i.e. start must be first)
 
+#CPUDIR is arch/arm/cpu/armv7/
+#来自于config.mk
 head-y := $(CPUDIR)/start.o
 head-$(CONFIG_4xx) += arch/powerpc/cpu/ppc4xx/resetvec.o
 head-$(CONFIG_MPC85xx) += arch/powerpc/cpu/mpc85xx/resetvec.o
 
+#如果board/$(VENDOR)/common有makefile, then HAVE_VENDOR_COMMON_LIB=y
 HAVE_VENDOR_COMMON_LIB = $(if $(wildcard $(srctree)/board/$(VENDOR)/common/Makefile),y,n)
 
 libs-y += lib/
@@ -640,6 +660,9 @@ libs-y += $(if $(BOARDDIR),board/$(BOARDDIR)/)
 
 libs-y := $(sort $(libs-y))
 
+#u-boot-dirs为u-boot-main的内容的目录名，并加上tools和examples
+#filter %/, $(libs-y) 返回的是末尾带/的字符串
+#patsubst 模式字符串替换函数, 将%/ 替换为%， 也就是说将末尾的/去掉
 u-boot-dirs	:= $(patsubst %/,%,$(filter %/, $(libs-y))) tools examples
 
 u-boot-alldirs	:= $(sort $(u-boot-dirs) $(patsubst %/,%,$(filter %/, $(libs-))))
@@ -1406,6 +1429,7 @@ clean := -f $(if $(KBUILD_SRC),$(srctree)/)scripts/Makefile.clean obj
 
 endif	# skip-makefile
 
+#如果一个规则没有依赖，没有命令，并且这个规则的目标不是一个存在的文件，则make认为只要该规则执行，该目标就会更新。这意味着以这种目标为依赖的目标，它们的命令总会执行。
 PHONY += FORCE
 FORCE:
 

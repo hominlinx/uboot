@@ -11,7 +11,15 @@
 #
 
 #有三个目的
-#1. include
+#1. include文件夹下建立相应的文件夹链接
+#2. 生成Makefile包含文件include/config.mk
+#3. 生成include/config.h
+#传入：
+# Status, Arch, CPU:SPLCPU, SoC, Vendor, Board name, Target, Options, Maintainers
+#假设传入的是：$1=Active $2=arm $3=armv7 $4=sunxi $5=- $6=sunxi $7=Bananapi $8=sun7i:BANANAPI,SPL,SUNXI_GMAC,RGMII,MACPWR=SUNXI_GPH(23),STATUSLED=244,STATUSLED1=245,FAST_MBUS $9 = -
+#执行完成之后 BOARD_NAME="Bananpi"
+#TARGETS="BANANAPI SPL SUNXI_GMAC RGMII MACPWR=SUNXI_GPH(23) STATUSLED=244 STATUSLED1=245 FAST_MBUS"
+#这个将会影响到include/config.h 的前几个宏
 APPEND=no	# Default: Create new config file
 BOARD_NAME=""	# Name to print in make output
 TARGETS=""
@@ -105,6 +113,7 @@ fi
 #
 # Create link to architecture specific headers
 #
+# KBUILD_SRC 是空的, 所以goto arch/arm/include
 if [ -n "$KBUILD_SRC" ] ; then
 	mkdir -p ${objtree}/include
 	LNPREFIX=${srctree}/arch/${arch}/include/asm/
@@ -114,6 +123,7 @@ else
 	cd arch/${arch}/include
 fi
 
+#这个是第一个目的 将asm/arch 链接到asm/arch-sunxi
 rm -f asm/arch
 
 if [ -z "${soc}" ] ; then
@@ -127,6 +137,7 @@ if [ "${arch}" = "arm" ] ; then
 	ln -s ${LNPREFIX}proc-armv asm/proc
 fi
 
+# 进入顶层的include
 if [ -z "$KBUILD_SRC" ] ; then
 	cd ${srctree}/include
 fi
