@@ -66,6 +66,7 @@ static inline phys_addr_t virt_to_phys(void * vaddr)
  * Generic virtual read/write.  Note that we don't support half-word
  * read/writes.  We define __arch_*[bl] here, and leave __arch_*w
  * to the architecture specific code.
+ * 把值通过指针读出来, 这个一般是IO地址
  */
 #define __arch_getb(a)			(*(volatile unsigned char *)(a))
 #define __arch_getw(a)			(*(volatile unsigned short *)(a))

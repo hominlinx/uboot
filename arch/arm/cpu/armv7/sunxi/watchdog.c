@@ -57,6 +57,9 @@ void watchdog_reset(void)
 	writel(WDT_CTRL_KEY | WDT_CTRL_RESTART, &wdog->ctl);
 }
 
+// 如果timeout为-1（WDT_OFF）, 执行writel（0， &wdog->mode);
+// writel 定在io.h 里面, 第一个参数是要写入的值，第二个参数是IO地址
+// sunxi_wdog 定义在timer.h中
 void watchdog_set(int timeout)
 {
 	static struct sunxi_wdog *const wdog =

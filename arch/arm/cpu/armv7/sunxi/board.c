@@ -92,6 +92,7 @@ void reset_cpu(ulong addr)
 }
 
 /* do some early init */
+// 这个是从lowlevel_init.S里面调过来的。
 void s_init(void)
 {
 #if !defined CONFIG_SPL_BUILD && (defined CONFIG_SUN7I || defined CONFIG_SUN6I)

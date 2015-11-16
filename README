@@ -2,3 +2,8 @@
 
 这个工程是uboot2014.04的源码，加入了全志A20的支持。建立这个工程目的是加入中文解释。
 
+## 翻译的目录：
+
+1. arch/arm/cpu/armv7/sunxi
+2. ./arch/arm/include/asm/arch-sunxi
+
