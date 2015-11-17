@@ -209,6 +209,7 @@ VENDOR=
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
 endif
+CROSS_COMPILE := arm-linux-gnueabihf-
 
 # SHELL used by kbuild
 #
@@ -771,7 +772,9 @@ append = cat $(filter-out $< $(PHONY), $^) >> $@
 quiet_cmd_pad_cat = CAT     $@
 cmd_pad_cat = $(cmd_objcopy) && $(append) || rm -f $@
 
+# 这个是最终目标
 all:		$(ALL-y)
+	cp u-boot-sunxi-with-spl.bin burn/
 
 PHONY += dtbs
 dtbs dts/dt.dtb: checkdtc u-boot

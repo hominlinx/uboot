@@ -6,7 +6,7 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-// 这些可以参考A20_User_Manual_v1.4_20150510.pdf, 来自github
+/*这些可以参考A20_User_Manual_v1.4_20150510.pdf, 来自github*/
 #ifndef _SUNXI_CPU_H
 #define _SUNXI_CPU_H
 

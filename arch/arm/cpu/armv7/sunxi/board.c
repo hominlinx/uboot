@@ -28,6 +28,13 @@
 
 #ifdef CONFIG_SPL_BUILD
 /* Pointer to the global data structure for SPL */
+/* DECLARE_GLOBAL_DATA_PTR 只是一个定义的宏，这个宏定义了一个gd_t全局数据结构的指针，
+ * 这个指针存放在指定的寄存器中(386体系结构没有放到指定寄存器中)。
+ * 这个宏定义在\include\asm-arm\globe_data.h文件中
+ * #define DECLARE_GLOBAL_DATA_PTR     register volatile gd_t *gd asm("r9")
+ * 声明一个寄存器变量 gd 占用r9。这个宏在所有需要引用全局数据指针gd_t *gd的源码中都有申明。
+ * 这个申明也避免编译器把r9分配给其它的变量.　所以gd就是r9,用r9来保存内存地址,达到全局使用目的，这个指针变量不占用内存。
+ * 总结：gd指向一个数据结构,用于保存参数。*/
 DECLARE_GLOBAL_DATA_PTR;
 
 /* The sunxi internal brom will try to loader external bootloader
@@ -92,7 +99,7 @@ void reset_cpu(ulong addr)
 }
 
 /* do some early init */
-// 这个是从lowlevel_init.S里面调过来的。
+/* 这个是从lowlevel_init.S里面调过来的。*/
 void s_init(void)
 {
 #if !defined CONFIG_SPL_BUILD && (defined CONFIG_SUN7I || defined CONFIG_SUN6I)
@@ -112,6 +119,7 @@ void s_init(void)
 #ifdef CONFIG_SPL_BUILD
 	gd = &gdata;
 	preloader_console_init();
+    printf("Hominlinx==>spl, gd:%x, %x\n", gd, gdata); /* 00004918  4a1c */
 
 #ifdef CONFIG_SPL_I2C_SUPPORT
 	/* Needed early by sunxi_board_init if PMU is enabled */

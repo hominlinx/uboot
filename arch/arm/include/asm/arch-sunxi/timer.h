@@ -65,7 +65,7 @@ struct sunxi_tgp {
 	u32 tgpd;
 };
 
-// 这个组成了A20 timer 寄存器
+/* 这个组成了A20 timer 寄存器 */
 struct sunxi_timer_reg {
 	u32 tirqen;		/* 0x00 */
 	u32 tirqsta;		/* 0x04 */

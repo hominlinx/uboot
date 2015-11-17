@@ -13,6 +13,7 @@
 #endif
 
 /* Architecture-specific global data */
+/* 这个定义了全局变量gd */
 struct arch_global_data {
 #if defined(CONFIG_FSL_ESDHC)
 	u32 sdhc_clk;
@@ -44,6 +45,7 @@ struct arch_global_data {
 
 #include <asm-generic/global_data.h>
 
+/* DECLARE_GLOBAL_DATA_PTR，指定占用寄存器r9。需要用的时候，声明这个宏*/
 #ifdef CONFIG_ARM64
 #define DECLARE_GLOBAL_DATA_PTR		register volatile gd_t *gd asm ("x18")
 #else

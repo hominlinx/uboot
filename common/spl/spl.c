@@ -239,6 +239,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 /*
  * This requires UART clocks to be enabled.  In order for this to work the
  * caller must ensure that the gd pointer is valid.
+ * 这个在spl时会执行
  */
 void preloader_console_init(void)
 {
@@ -249,6 +250,7 @@ void preloader_console_init(void)
 
 	gd->have_console = 1;
 
+    puts("\nHominlinx===>gd\n");
 	puts("\nU-Boot SPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 			U_BOOT_TIME ")\n");
 #ifdef CONFIG_SPL_DISPLAY_PRINT

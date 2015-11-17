@@ -24,9 +24,9 @@
 #include <linux/list.h>
 
 typedef struct global_data {
-	bd_t *bd;
-	unsigned long flags;
-	unsigned int baudrate;
+	bd_t *bd;   /* 开发板相关参数,结构体变量，参考u-boot.h */
+	unsigned long flags; /*指示标志，如设备已经初始化标志等 */
+	unsigned int baudrate; /*串行口通讯速率*/
 	unsigned long cpu_clk;	/* CPU clock in Hz!		*/
 	unsigned long bus_clk;
 	/* We cannot bracket this with CONFIG_PCI due to mpc5xxx */

@@ -1,9 +1,13 @@
 ## NOTE
 
 这个工程是uboot2014.04的源码，加入了全志A20的支持。建立这个工程目的是加入中文解释。
+burn这个目录是是一个脚本，在这个目录下执行脚本可以进行make，并且烧写到sd里面
 
 ## 翻译的目录：
 
 1. arch/arm/cpu/armv7/sunxi
 2. ./arch/arm/include/asm/arch-sunxi
+3. arch/arm/include/asm/global_data.h 包含了全局变量`gd`
+4. arch/arm/include/asm-arm/u-boot.h 包含了板子参数`bd`
+
 
