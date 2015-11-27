@@ -9,5 +9,13 @@ burn这个目录是是一个脚本，在这个目录下执行脚本可以进行m
 2. ./arch/arm/include/asm/arch-sunxi
 3. arch/arm/include/asm/global_data.h 包含了全局变量`gd`
 4. arch/arm/include/asm-arm/u-boot.h 包含了板子参数`bd`
+5. arch/arm/lib/crt0.S 包含了_main
 
 
+------------------
+
+#### spl
+
+spl : 一些硬件的初始化，读取uboot， 跳转到uboot。
+
+`lowlevel_init`(arch/arm/cpu/armv7/lowlevel_init.S)-->`_main`(arch/arm/lib/crt0.S)--->`board_init_f`(arch/arm/lib/spl.c)--->`board_init_r`(common/spl/spl.c)--->`jump_to_image_no_args`

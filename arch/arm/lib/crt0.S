@@ -69,7 +69,7 @@ ENTRY(_main)
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	sub	sp, sp, #GD_SIZE	/* allocate one GD above SP */
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
-	mov	r9, sp		/* GD is above SP */
+	mov	r9, sp		/* GD is above SP  r9 指向 global_data*/
 	mov	r0, #0
 	bl	board_init_f
 

@@ -134,11 +134,17 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	u32 boot_device;
 	debug(">>spl:board_init_r()\n");
 
+    /*
+     * 如果定义了CONFIG_SYS_SPL_MALLOC_START, 则进行memory 的malloc池的初始化。以后调用malloc就在这个池子里分配内存。
+     */
 #ifdef CONFIG_SYS_SPL_MALLOC_START
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
 			CONFIG_SYS_SPL_MALLOC_SIZE);
 #endif
 
+    /*
+     * 如果没有定义：CONFIG_PPC, 则进行timer的初始化：timer_init()
+     */
 #ifndef CONFIG_PPC
 	/*
 	 * timer_init() does not exist on PPC systems. The timer is initialized
@@ -147,10 +153,17 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	timer_init();
 #endif
 
+    /*
+     * 这里是board的相关操作。
+     */
 #ifdef CONFIG_SPL_BOARD_INIT
 	spl_board_init();
 #endif
 
+    /*
+     * 这里监测从什么设备启动起来的。 spl_boot_device() 函数在arch/arm/cpu/armv7/sunxi/board.c中。 返回BOOT_DEVICE_MMC1
+     * 如果定义了CONFIG_SPL_MMC_SUPPORT, 则执行spl_mmc_load_image()，其就是将image从mmc/sd里面读取到ram中。
+     */
 	boot_device = spl_boot_device();
 	debug("boot device - %d\n", boot_device);
 	switch (boot_device) {
@@ -220,6 +233,9 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		hang();
 	}
 
+    /*
+     * 当要启动的image位于RAM中，我们就可以启动之。 至此spl完成任务。。
+     */
 	switch (spl_image.os) {
 	case IH_OS_U_BOOT:
 		debug("Jumping to U-Boot\n");
