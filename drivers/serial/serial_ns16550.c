@@ -257,6 +257,9 @@ struct serial_device eserial6_device =
 	INIT_ESERIAL_STRUCTURE(6, "eserial5");
 #endif
 
+    /*
+     * CONFIG_CONS_INDEX == 1为真
+     */
 __weak struct serial_device *default_serial_console(void)
 {
 #if CONFIG_CONS_INDEX == 1

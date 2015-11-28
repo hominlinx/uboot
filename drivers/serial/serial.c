@@ -347,6 +347,7 @@ static struct serial_device *get_current(void)
 {
 	struct serial_device *dev;
 
+    /* 会执行这一句, drivers/serial/serial_ns16550.c*/
 	if (!(gd->flags & GD_FLG_RELOC))
 		dev = default_serial_console();
 	else if (!serial_current)

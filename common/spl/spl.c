@@ -255,7 +255,8 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 /*
  * This requires UART clocks to be enabled.  In order for this to work the
  * caller must ensure that the gd pointer is valid.
- * 这个在spl时会执行
+ * 这个在spl时会执行, 对gd的某些成员变量赋值或者说初始化（用于初始化串口）
+ * serial_init 在drivers/serial/serial.c
  */
 void preloader_console_init(void)
 {

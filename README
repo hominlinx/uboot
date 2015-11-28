@@ -10,6 +10,7 @@ burn这个目录是是一个脚本，在这个目录下执行脚本可以进行m
 3. arch/arm/include/asm/global_data.h 包含了全局变量`gd`
 4. arch/arm/include/asm-arm/u-boot.h 包含了板子参数`bd`
 5. arch/arm/lib/crt0.S 包含了_main
+6. common/console.c 包含了puts
 
 
 ------------------

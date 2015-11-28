@@ -444,6 +444,9 @@ void putc(const char c)
 	}
 }
 
+/*
+ * 这个函数很重要
+ */
 void puts(const char *s)
 {
 #ifdef CONFIG_SANDBOX
