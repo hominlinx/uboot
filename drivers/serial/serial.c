@@ -15,6 +15,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+/* 链表*/
 static struct serial_device *serial_devices;
 static struct serial_device *serial_current;
 /*
@@ -102,6 +103,7 @@ U_BOOT_ENV_CALLBACK(baudrate, on_baudrate);
  * serial_initfunc() - Forward declare of driver registration routine
  * @name:	Name of the real driver registration routine.
  *
+ * arm/lib/board.c里面调用过来的
  * This macro expands onto forward declaration of a driver registration
  * routine, which is then used below in serial_initialize() function.
  * The declaration is made weak and aliases to serial_null() so in case
@@ -164,6 +166,7 @@ serial_initfunc(arc_serial_initialize);
 /**
  * serial_register() - Register serial driver with serial driver core
  * @dev:	Pointer to the serial driver structure
+ * ns16550_serial_initialize调用过来的, 将dev节点加入到serial_devices里面。
  *
  * This function registers the serial driver supplied via @dev with
  * serial driver core, thus making U-Boot aware of it and making it
@@ -263,17 +266,20 @@ void serial_initialize(void)
  * This function generates a proxy driver for each serial port driver.
  * These proxy drivers then register with the STDIO core, making the
  * serial drivers available as STDIO devices.
+ * 将serial_devices链表上所有serial device 同样初始化一个dev，flag为output input，调用stdio-register，将stdio-dev添加到全局devs链表中。
+ * 可以想象，serial_stdio_init是在drivers/serial/serial.c中实现，uboot在这里是利用的内核分层思想，drivers/serial下是特定serial驱动，分别调用serial_register注册到serial_devices中，这可以说是通用的serial驱动层，
+ * 通用serial层调用serial-stdio-init将所有serial注册到stdio device中，这就是通用的stdio层。
  */
 void serial_stdio_init(void)
 {
 	struct stdio_dev dev;
-	struct serial_device *s = serial_devices;
+	struct serial_device *s = serial_devices; /* 将已经初始化好的串口设备结构体指针给s*/
 
-	while (s) {
+	while (s) { /* 循环将所有的串口设备初始化给标准输入输出 */
 		memset(&dev, 0, sizeof(dev));
 
 		strcpy(dev.name, s->name);
-		dev.flags = DEV_FLAGS_OUTPUT | DEV_FLAGS_INPUT;
+		dev.flags = DEV_FLAGS_OUTPUT | DEV_FLAGS_INPUT; /* 设置标志位，表明该串口是标准输入输出*/
 
 		dev.start = s->start;
 		dev.stop = s->stop;
@@ -282,7 +288,7 @@ void serial_stdio_init(void)
 		dev.getc = s->getc;
 		dev.tstc = s->tstc;
 
-		stdio_register(&dev);
+		stdio_register(&dev); /* 向标准输入输出注册设备 , 在stdio.c里面*/
 
 		s = s->next;
 	}
@@ -331,6 +337,7 @@ void serial_reinit_all(void)
 /**
  * get_current() - Return pointer to currently selected serial port
  *
+ * 得到当前的串口
  * This function returns a pointer to currently selected serial port.
  * The currently selected serial port is altered by serial_assign()
  * function.
@@ -375,6 +382,7 @@ static struct serial_device *get_current(void)
  * usually involves setting up the registers of that particular port,
  * enabling clock and such. This function uses the get_current() call
  * to determine which port is selected.
+ * 初始化串口
  *
  * Returns 0 on success, negative on error.
  */

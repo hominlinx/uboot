@@ -19,7 +19,9 @@
 #define DEV_FLAGS_SYSTEM 0x80000000	/* Device is a system device		*/
 #define DEV_EXT_VIDEO	 0x00000001	/* Video extensions supported		*/
 
-/* Device information */
+/* Device information
+ * 这个是创建的设备表的类型定义.
+ */
 struct stdio_dev {
 	int	flags;			/* Device flags: input/output/system	*/
 	int	ext;			/* Supported extensions			*/

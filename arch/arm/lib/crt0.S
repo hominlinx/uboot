@@ -79,6 +79,9 @@ ENTRY(_main)
  * Set up intermediate environment (new sp and gd) and call
  * relocate_code(addr_moni). Trick here is that we'll return
  * 'here' but relocated.
+ * 下面4个汇编实现了新gd的更新，首先sp 8字节对齐，方便后面函数开辟栈能对齐；
+ * 然后获取gd->bd地址到r9中，需要注意，在board_init_f中gd->bd已经更新为新分配的bd了，下一条汇编将r9减掉bd的size，这样就获取到了board_init_f中新分配的gd了！后面汇编则是为relocate_code做准备，首先加载here地址，然后加上新地址偏移量给lr，则是code relocate后的新here了，relocate_code返回条转到lr，则是新位置的here！
+ * 最后在r0中保存code的新地址，跳转到relocate_code
  */
 
 	ldr	sp, [r9, #GD_START_ADDR_SP]	/* sp = gd->start_addr_sp */

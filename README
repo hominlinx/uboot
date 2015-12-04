@@ -20,3 +20,9 @@ burn这个目录是是一个脚本，在这个目录下执行脚本可以进行m
 spl : 一些硬件的初始化，读取uboot， 跳转到uboot。
 
 `lowlevel_init`(arch/arm/cpu/armv7/lowlevel_init.S)-->`_main`(arch/arm/lib/crt0.S)--->`board_init_f`(arch/arm/lib/spl.c)--->`board_init_r`(common/spl/spl.c)--->`jump_to_image_no_args`
+
+-----------------
+
+#### 主体
+
+`_main`(/arch/arm/lib/crt0.S) ----> `board_init_f`(arch/arm/lib/board.c) ---->`relocate_code`(arch/arm/lib/relocate.S) ---->  `board_init_r`(arch/arm/lib/board.c)

@@ -10,6 +10,7 @@
 
 /*
  * void relocate_code(addr_moni)
+ * 将uboot代码copy到relocaddr,这部分算是整个uboot中最核心也是最难理解的代码
  *
  * This function relocates the monitor code.
  *

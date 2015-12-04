@@ -25,6 +25,9 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+/*
+ * 这个是定义一个stdio_dev，链表头。
+ */
 static struct stdio_dev devs;
 struct stdio_dev *stdio_devices[] = { NULL, NULL, NULL };
 char *stdio_names[MAX_FILES] = { "stdin", "stdout", "stderr" };
@@ -54,6 +57,9 @@ int nulldev_input(void)
 
 /**************************************************************************
  * SYSTEM DRIVERS
+ * 将串口设备到devs中
+ * 将串口名，串口的输入输出函数的指针都传递给dev相应的成员变量，并置设备标志dev.flags。接着调用
+ * stdio_register (&dev)函数进行注册。
  **************************************************************************
  */
 
@@ -179,6 +185,9 @@ int stdio_deregister(const char *devname)
 }
 #endif	/* CONFIG_SYS_STDIO_DEREGISTER */
 
+/*
+ * 这个是board_init_r调过来的。
+ */
 int stdio_init (void)
 {
 #if defined(CONFIG_NEEDS_MANUAL_RELOC)
@@ -193,7 +202,7 @@ int stdio_init (void)
 	}
 #endif /* CONFIG_NEEDS_MANUAL_RELOC */
 
-	/* Initialize the list */
+	/* Initialize the list, 链表头 */
 	INIT_LIST_HEAD(&(devs.list));
 
 #ifdef CONFIG_SYS_I2C
@@ -215,8 +224,8 @@ int stdio_init (void)
 #ifdef CONFIG_LOGBUFFER
 	drv_logbuff_init ();
 #endif
-	drv_system_init ();
-	serial_stdio_init ();
+	drv_system_init (); /* 默认调用这个 */
+	serial_stdio_init (); /* serial.c 里面 */
 #ifdef CONFIG_USB_TTY
 	drv_usbtty_init ();
 #endif

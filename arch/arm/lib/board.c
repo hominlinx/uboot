@@ -196,7 +196,7 @@ static int arm_pci_init(void)
  * argument, and returns an integer return code, where 0 means
  * "continue" and != 0 means "fatal error, hang the system".
  */
-typedef int (init_fnc_t) (void);
+typedef int (init_fnc_t) (void); /* 函数指针的声明，使用的时候需要使用： init_fnc_t* xxx; */
 
 void __dram_init_banksize(void)
 {
@@ -260,6 +260,10 @@ init_fnc_t *init_sequence[] = {
 	NULL,
 };
 
+/*
+ * 主要根据配置对全局信息结构gd进行初始化。
+ * 该函数完成之后会再回到_main
+ */
 void board_init_f(ulong bootflag)
 {
 	bd_t *bd;
@@ -274,7 +278,7 @@ void board_init_f(ulong bootflag)
 
 	memset((void *)gd, 0, sizeof(gd_t));
 
-	gd->mon_len = (ulong)&__bss_end - (ulong)_start;
+	gd->mon_len = (ulong)&__bss_end - (ulong)_start; /*初始化mom_len,代表uboot code的大小 */
 #ifdef CONFIG_OF_EMBED
 	/* Get a pointer to the FDT */
 	gd->fdt_blob = __dtb_db_begin;
@@ -286,6 +290,7 @@ void board_init_f(ulong bootflag)
 	gd->fdt_blob = (void *)getenv_ulong("fdtcontroladdr", 16,
 						(uintptr_t)gd->fdt_blob);
 
+    /* 遍历init_sequence 所有函数*/
 	for (init_fnc_ptr = init_sequence; *init_fnc_ptr; ++init_fnc_ptr) {
 		if ((*init_fnc_ptr)() != 0) {
 			hang ();
@@ -503,7 +508,7 @@ static void display_fdt_model(const void *blob)
  * running from RAM and have a "normal" C environment, i. e. global
  * data can be written, BSS has been cleared, the stack size in not
  * that critical any more, etc.
- *
+ * 参数1是新gd指针，参数2是relocate addr，也就是新code地址
  ************************************************************************
  */
 
@@ -514,7 +519,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	ulong flash_size;
 #endif
 
-	gd->flags |= GD_FLG_RELOC;	/* tell others: relocation done */
+	gd->flags |= GD_FLG_RELOC;	/* tell others: relocation done,置位gd->flags，标志已经relocate */
 	bootstage_mark_name(BOOTSTAGE_ID_START_UBOOT_R, "board_init_r");
 
 	monitor_flash_len = (ulong)&__rel_dyn_end - (ulong)_start;
@@ -523,7 +528,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	enable_caches();
 
 	debug("monitor flash len: %08lX\n", monitor_flash_len);
-	board_init();	/* Setup chipselects */
+	board_init();	/* Setup chipselects ,board_init是需要实现的板级支持函数。做开发板的基本初始化*/
 	/*
 	 * TODO: printing of the clock inforamtion of the board is now
 	 * implemented as part of bdinfo command. Currently only support for
@@ -533,7 +538,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
 #ifdef CONFIG_CLOCKS
 	set_cpu_clk_info(); /* Setup clock information */
 #endif
-	serial_initialize();
+	serial_initialize(); /* serial 的初始化, 在drivers/serial/serial.c */
 
 	debug("Now running in RAM - U-Boot at: %08lx\n", dest_addr);
 

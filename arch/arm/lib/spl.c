@@ -22,7 +22,7 @@ gd_t gdata __attribute__ ((section(".data")));
  * DDR are enabled, ensure that the stack pointer is valid, clear the BSS
  * and call board_init_f.  We provide this version by default but mark it
  * as __weak to allow for platforms to do this in their own way if needed.
- * 可以被重新定义, 对bss段清零
+ * 可以被重新定义, 对bss段清零, 这个是在spl里面做的。做完spl就完事了。。
  */
 void __weak board_init_f(ulong dummy)
 {

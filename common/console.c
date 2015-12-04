@@ -96,6 +96,9 @@ extern int overwrite_console(void);
 
 #endif /* CONFIG_SYS_CONSOLE_IS_IN_ENV */
 
+/*
+ * 将搜到的设备指针赋给标准I/O数组,完成控制台的初始化
+ */
 static int console_setfile(int file, struct stdio_dev * dev)
 {
 	int error = 0;
@@ -146,7 +149,7 @@ static int console_setfile(int file, struct stdio_dev * dev)
 
 static struct stdio_dev *tstcdev;
 struct stdio_dev **console_devices[MAX_FILES];
-int cd_count[MAX_FILES];
+int cd_count[MAX_FILES]; //三个数组
 
 /*
  * This depends on tstc() always being called before getc().
@@ -198,6 +201,9 @@ static void console_putc(int file, const char c)
 	}
 }
 
+/*
+ * 输出通过stdio层, 可以得到stdio_dev, 这个其实就是 stdio.c 里面stdio_dev devs 的一个节点。
+ */
 static void console_puts(int file, const char *s)
 {
 	int i;
@@ -466,9 +472,11 @@ void puts(const char *s)
 		return;
 #endif
 
+    /* 如果终端初始化不ok的话，调用pre_console_puts */
 	if (!gd->have_console)
 		return pre_console_puts(s);
 
+    /* 如果标准输入输出初始化ok，则调用fputs，否则使用serial_puts, 一般情况下， fputs也是使用的串口*/
 	if (gd->flags & GD_FLG_DEVINIT) {
 		/* Send to the standard output */
 		fputs(stdout, s);
@@ -773,11 +781,15 @@ done:
 #else /* CONFIG_SYS_CONSOLE_IS_IN_ENV */
 
 /* Called after the relocation - use desired console functions */
+/*
+ * 在serial层调用serial-stdio-init将所有的serial注册到stdio device中，这就是通用stdio层
+ * board_init_r中调用完stdio_init后又调用了console_init_r
+ */
 int console_init_r(void)
 {
 	struct stdio_dev *inputdev = NULL, *outputdev = NULL;
 	int i;
-	struct list_head *list = stdio_get_list();
+	struct list_head *list = stdio_get_list(); /* 获得链表头*/
 	struct list_head *pos;
 	struct stdio_dev *dev;
 
