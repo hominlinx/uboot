@@ -382,7 +382,7 @@ static struct serial_device *get_current(void)
  * usually involves setting up the registers of that particular port,
  * enabling clock and such. This function uses the get_current() call
  * to determine which port is selected.
- * 初始化串口
+ * 初始化串口, 这个是最底层
  *
  * Returns 0 on success, negative on error.
  */

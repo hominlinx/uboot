@@ -13,6 +13,16 @@ make -C ../ CROSS_COMPILE=arm-linux-gnueabi-
 #if make has error, exit
 echo "=====>>>> make complite "$?
 
+g_hasdev=0
+echo "The dev is :$1"
+#判断U 盘是否插入。
+if [ -b $1 ] && [ -b $1""1 ];then
+    g_hasdev=1;
+else
+    echo "$1 isn't exit...."
+    exit 0
+fi
+
 #convert the boot.txt to boot.scr
 #mkimage -A arm -O linux -T script -C none -n "U-Boot commands" -d boot.txt boot.scr
 

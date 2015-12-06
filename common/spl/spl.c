@@ -267,7 +267,7 @@ void preloader_console_init(void)
 
 	gd->have_console = 1;
 
-    puts("\nHominlinx===>gd\n");
+    puts("\nHominlinx==============++++++++++++++++++++++++++\n");
 	puts("\nU-Boot SPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
 			U_BOOT_TIME ")\n");
 #ifdef CONFIG_SPL_DISPLAY_PRINT
