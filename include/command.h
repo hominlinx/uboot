@@ -26,15 +26,16 @@
 #ifndef	__ASSEMBLY__
 /*
  * Monitor Command Table
+ * 每一个命令在内存中用这个结构体表示。
  */
 
 struct cmd_tbl_s {
-	char		*name;		/* Command Name			*/
-	int		maxargs;	/* maximum number of arguments	*/
-	int		repeatable;	/* autorepeat allowed?		*/
+	char		*name;		/* Command Name , 命令名，输入的就是它			*/
+	int		maxargs;	/* maximum number of arguments	最大的参数个数*/
+	int		repeatable;	/* autorepeat allowed?		允许自动重复发送，就是在按下空格键后执行最后一条命令*/
 					/* Implementation function	*/
-	int		(*cmd)(struct cmd_tbl_s *, int, int, char * const []);
-	char		*usage;		/* Usage message	(short)	*/
+	int		(*cmd)(struct cmd_tbl_s *, int, int, char * const []); /* 实现命令的函数*/
+	char		*usage;		/* Usage message	(short)	短的提示信息*/
 #ifdef	CONFIG_SYS_LONGHELP
 	char		*help;		/* Help  message	(long)	*/
 #endif
@@ -144,6 +145,7 @@ int cmd_process(int flag, int argc, char * const argv[],
 #endif	/* __ASSEMBLY__ */
 
 /*
+ * uboot中的命令使用U_BOOT_CMD这个宏声明来注册进系统，链接脚本会把所有的cmd_tbl_t结构体放在相邻的地方。
  * Command Flags:
  */
 #define CMD_FLAG_REPEAT		0x0001	/* repeat last command		*/
