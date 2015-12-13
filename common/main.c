@@ -43,7 +43,7 @@ void show_boot_progress (int val) __attribute__((weak, alias("__show_boot_progre
 #define debug_bootkeys(fmt, args...)		\
 	debug_cond(DEBUG_BOOTKEYS, fmt, ##args)
 
-char        console_buffer[CONFIG_SYS_CBSIZE + 1];	/* console I/O buffer	*/
+char        console_buffer[CONFIG_SYS_CBSIZE + 1];	/* console I/O buffer, 全局变量	*/
 
 static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen);
 static const char erase_seq[] = "\b \b";		/* erase sequence	*/
@@ -413,9 +413,12 @@ static void process_boot_delay(void)
 }
 #endif /* CONFIG_BOOTDELAY */
 
+/*
+ * 这个是主循环
+ */
 void main_loop(void)
 {
-#ifndef CONFIG_SYS_HUSH_PARSER
+#ifndef CONFIG_SYS_HUSH_PARSER /* 采用“hush”方式的主循环 */
 	static char lastcommand[CONFIG_SYS_CBSIZE] = { 0, };
 	int len;
 	int rc = 1;
@@ -491,7 +494,7 @@ void main_loop(void)
 			reset_cmd_timeout();
 		}
 #endif
-		len = readline (CONFIG_SYS_PROMPT);
+		len = readline (CONFIG_SYS_PROMPT); /* 读取一行命令输入, CFG_PROMPT是命令提示符，可以自己修改字符串内容，显示不同的提示符。 */
 
 		flag = 0;	/* assume no special flags for now */
 		if (len > 0)
@@ -993,7 +996,7 @@ int readline (const char *const prompt)
 	 */
 	console_buffer[0] = '\0';
 
-	return readline_into_buffer(prompt, console_buffer, 0);
+	return readline_into_buffer(prompt, console_buffer, 0); /* 将一行串口输入读入全局变量console_buffer */
 }
 
 
@@ -1038,7 +1041,7 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 	}
 	col = plen;
 
-	for (;;) {
+	for (;;) { /* 这里又是一个循环，即等待一行输入，不回车或换行将一直循环 */
 #ifdef CONFIG_BOOT_RETRY_TIME
 		while (!tstc()) {	/* while no incoming data */
 			if (retry_time >= 0 && get_ticks() > endtime)
@@ -1046,7 +1049,7 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 			WATCHDOG_RESET();
 		}
 #endif
-		WATCHDOG_RESET();		/* Trigger watchdog, if needed */
+		WATCHDOG_RESET();		/* Trigger watchdog, if needed , 看门狗，实际是空的宏，没使用；*/
 
 #ifdef CONFIG_SHOW_ACTIVITY
 		while (!tstc()) {
@@ -1054,19 +1057,20 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 			WATCHDOG_RESET();
 		}
 #endif
-		c = getc();
+		c = getc();/* 获取串口输入一个字符，假设要将输入命令移植到另一个裸机程序内，则需要实现这个接口  */
 
 		/*
 		 * Special character handling
+         * 特别字符处理，都是ASCC-II码，回车、换行...等等特殊字符
 		 */
 		switch (c) {
-		case '\r':			/* Enter		*/
+		case '\r':			/* Enter收到回车符，认为一行输入完成，返回执行命令		*/
 		case '\n':
 			*p = '\0';
 			puts ("\r\n");
 			return p - p_buf;
 
-		case '\0':			/* nul			*/
+		case '\0':			/* nul收到空字符，啥也不做			*/
 			continue;
 
 		case 0x03:			/* ^C - break		*/
@@ -1089,14 +1093,15 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 			}
 			continue;
 
-		case 0x08:			/* ^H  - backspace	*/
-		case 0x7F:			/* DEL - backspace	*/
+		case 0x08:			/* ^H  - backspace, backspace输入	*/
+		case 0x7F:			/* DEL - backspace, delete键输入	*/
 			p=delete_char(p_buf, p, &col, &n, plen);
 			continue;
 
 		default:
 			/*
 			 * Must be a normal character then
+             * 普通字符输入，存入全局字符串变量console_buffer
 			 */
 			if (n < CONFIG_SYS_CBSIZE-2) {
 				if (c == '\t') {	/* expand TABs */
@@ -1116,6 +1121,7 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 					/*
 					 * Echo input using puts() to force an
 					 * LCD flush if we are using an LCD
+                     * 将输入打印出来，这样PC上的超级终端或minicom就能看到输入命令了
 					 */
 					++col;
 					buf[0] = c;
@@ -1330,6 +1336,7 @@ static void process_macros (const char *input, char *output)
  * may be the result from getenv(), which returns a pointer directly to
  * the environment data, which may change magicly when the command we run
  * creates or modifies environment variables (like "bootp" does).
+ * 这个函数负责调用解析命令模块和命令执行模块
  */
 static int builtin_run_command(const char *cmd, int flag)
 {
@@ -1372,6 +1379,7 @@ static int builtin_run_command(const char *cmd, int flag)
 		/*
 		 * Find separator, or string end
 		 * Allow simple escape of ';' by writing "\;"
+         * 找到分隔符，如空格，目录路径使用的斜杠"\"，制表符等等.并找到字符串的尾
 		 */
 		for (inquotes = 0, sep = str; *sep; sep++) {
 			if ((*sep=='\'') &&
@@ -1397,10 +1405,10 @@ static int builtin_run_command(const char *cmd, int flag)
 			str = sep;	/* no more commands for next pass */
 		debug_parser("token: \"%s\"\n", token);
 
-		/* find macros in this token and replace them */
+		/* find macros in this token and replace them, 将输入的宏进行替换 */
 		process_macros (token, finaltoken);
 
-		/* Extract arguments */
+		/* Extract arguments, 命令解析 */
 		if ((argc = parse_line (finaltoken, argv)) == 0) {
 			rc = -1;	/* no command at all */
 			continue;
@@ -1431,6 +1439,7 @@ int run_command(const char *cmd, int flag)
 	/*
 	 * builtin_run_command can return 0 or 1 for success, so clean up
 	 * its result.
+     * 实际执行的代码
 	 */
 	if (builtin_run_command(cmd, flag) == -1)
 		return 1;

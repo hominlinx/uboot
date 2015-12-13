@@ -162,6 +162,10 @@ int cmd_process(int flag, int argc, char * const argv[],
 # define _CMD_HELP(x)
 #endif
 
+/*
+ * ll_entry_declare 也是一个宏函数，定义是目录 \include 下的文件 link_lists.h中
+ */
+
 #define U_BOOT_CMD_MKENT_COMPLETE(_name, _maxargs, _rep, _cmd,		\
 				_usage, _help, _comp)			\
 		{ #_name, _maxargs, _rep, _cmd, _usage,			\
